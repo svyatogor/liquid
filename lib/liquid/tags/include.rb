@@ -1,11 +1,11 @@
 module Liquid
   class Include < Tag
     Syntax = /(#{QuotedFragment}+)(\s+(?:with|for)\s+(#{QuotedFragment}+))?/
-  
-    def initialize(tag_name, markup, tokens)      
+
+    def initialize(tag_name, markup, tokens, context)
       if markup =~ Syntax
 
-        @template_name = $1        
+        @template_name = $1
         @variable_name = $3
         @attributes    = {}
 
@@ -19,38 +19,38 @@ module Liquid
 
       super
     end
-  
-    def parse(tokens)      
+
+    def parse(tokens)
     end
-  
-    def render(context)      
+
+    def render(context)
       file_system = context.registers[:file_system] || Liquid::Template.file_system
-      source  = file_system.read_template_file(context[@template_name])      
-      partial = Liquid::Template.parse(source)      
-      
+      source  = file_system.read_template_file(context[@template_name])
+      partial = Liquid::Template.parse(source)
+
       variable = context[@variable_name || @template_name[1..-2]]
-      
+
       context.stack do
         @attributes.each do |key, value|
           context[key] = context[value]
         end
 
         if variable.is_a?(Array)
-          
-          variable.collect do |variable|            
+
+          variable.collect do |variable|
             context[@template_name[1..-2]] = variable
             partial.render(context)
           end
 
         else
-                    
+
           context[@template_name[1..-2]] = variable
           partial.render(context)
-          
+
         end
       end
     end
   end
 
-  Template.register_tag('include', Include)  
+  Template.register_tag('include', Include)
 end

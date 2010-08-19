@@ -6,9 +6,14 @@ class StandardTagTest < Test::Unit::TestCase
 
 
   def test_tag
-    tag = Tag.new('tag', [], [])
+    tag = Tag.new('tag', [], [], {})
     assert_equal 'liquid::tag', tag.name
     assert_equal '', tag.render(Context.new)
+  end
+
+  def test_store_context_at_parsing_time
+    tag = Tag.new('tag', [], [], { :foo => 'bar' })
+    assert_equal 'bar', tag.context[:foo]
   end
 
   def test_no_transform

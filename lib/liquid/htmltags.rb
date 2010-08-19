@@ -2,7 +2,7 @@ module Liquid
   class TableRow < Block
     Syntax = /(\w+)\s+in\s+(#{VariableSignature}+)/
 
-    def initialize(tag_name, markup, tokens)
+    def initialize(tag_name, markup, tokens, context)
       if markup =~ Syntax
         @variable_name = $1
         @collection_name = $2

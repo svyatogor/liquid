@@ -41,9 +41,9 @@ module Liquid
       end
 
       # creates a new <tt>Template</tt> object from liquid source code
-      def parse(source)
+      def parse(source, context = {})
         template = Template.new
-        template.parse(source)
+        template.parse(source, context)
         template
       end
     end
@@ -54,8 +54,8 @@ module Liquid
 
     # Parse source code.
     # Returns self for easy chaining
-    def parse(source)
-      @root = Document.new(tokenize(source))
+    def parse(source, context = {})
+      @root = Document.new(tokenize(source), context.merge(:template => self))
       self
     end
 
@@ -88,7 +88,7 @@ module Liquid
     #
     def render(*args)
       return '' if @root.nil?
-      
+
       context = case args.first
       when Liquid::Context
         args.shift

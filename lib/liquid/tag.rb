@@ -1,11 +1,12 @@
 module Liquid
 
   class Tag
-    attr_accessor :nodelist
+    attr_accessor :nodelist, :context
 
-    def initialize(tag_name, markup, tokens)
+    def initialize(tag_name, markup, tokens, context)
       @tag_name   = tag_name
       @markup     = markup
+      @context    = context
       parse(tokens)
     end
 
