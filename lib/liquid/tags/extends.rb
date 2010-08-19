@@ -17,7 +17,7 @@ module Liquid
 
       super
 
-      context.merge!(:extending => true, :blocks => find_blocks(@nodelist))
+      context.merge!(:blocks => find_blocks(@nodelist))
 
       # puts "[EXTENDS #{@template_name}] blocks = #{context[:blocks].inspect}"
 

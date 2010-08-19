@@ -31,33 +31,30 @@ module Liquid
     end
 
     def end_tag
-      if context[:extending]
-        block = context[:blocks][@name]
+      context[:blocks] ||= {}
 
-        # puts "[BLOCK #{@name}|end_tag] extending, block found ? #{!block.nil?}"
+      block = context[:blocks][@name]
 
-        if block
-          # needed for the block.super statement
-          # puts "[BLOCK #{@name}|end_tag] nodelist #{@nodelist.inspect}"
-          block.add_parent(@nodelist)
-          @parent = block.parent
-          # puts "[BLOCK #{@name}|end_tag] direct parent #{block.parent.inspect}"
-          @nodelist = block.nodelist
-        else
-          # puts "[BLOCK #{@name}|end_tag] register it"
-          # register it
-          context[:blocks][@name] = self
-        end
+      if block
+        # needed for the block.super statement
+        # puts "[BLOCK #{@name}|end_tag] nodelist #{@nodelist.inspect}"
+        block.add_parent(@nodelist)
+
+        @parent = block.parent
+        @nodelist = block.nodelist
+
+        # puts "[BLOCK #{@name}|end_tag] direct parent #{block.parent.inspect}"
       else
-        (context[:blocks] ||= {})[@name] = self
-        # puts "[BLOCK #{@name}|end_tag] not extending"
+        # register it
+        # puts "[BLOCK #{@name}|end_tag] register it"
+        context[:blocks][@name] = self
       end
     end
 
     def add_parent(nodelist)
-      if parent
+      if @parent
         # puts "[BLOCK #{@name}|add_parent] go upper"
-        parent.add_parent(nodelist)
+        @parent.add_parent(nodelist)
       else
         # puts "[BLOCK #{@name}|add_parent] create parent #{@tag_name}, #{@name}"
         @parent = self.class.new(@tag_name, @name, nil, {})
