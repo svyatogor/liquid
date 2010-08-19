@@ -13,6 +13,13 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = false
 end
 
+Rake::TestTask.new(:ti) do |t|
+  t.libs << "lib"
+  t.libs << "test"
+  t.test_files = ['test/test_helper.rb', 'test/extends_test.rb', 'test/inherited_block_test.rb']
+  t.verbose = false
+end
+
 gemspec = eval(File.read('liquid.gemspec'))
 Rake::GemPackageTask.new(gemspec) do |pkg|
   pkg.gem_spec = gemspec
@@ -25,20 +32,18 @@ end
 
 namespace :profile do
 
-  
   task :default => [:run]
-  
+
   desc "Run the liquid profile/perforamce coverage"
   task :run do
-  
+
     ruby "performance/shopify.rb"
-  
+
   end
-  
-  desc "Run KCacheGrind" 
+
+  desc "Run KCacheGrind"
   task :grind => :run  do
     system "kcachegrind /tmp/liquid.rubyprof_calltreeprinter.txt"
   end
 end
-  
-  
+
