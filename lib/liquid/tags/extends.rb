@@ -27,19 +27,15 @@ module Liquid
       @nodelist = parent_template.root.nodelist
     end
 
-    private
-
-    def parse_parent_template(context)
-      source = Template.file_system.read_template_file(@template_name)
-      Template.parse(source, context)
-    end
+    protected
 
     def find_blocks(nodelist, blocks = {})
       if nodelist && nodelist.any?
         nodelist.inject(blocks) do |b, node|
           if node.is_a?(Liquid::InheritedBlock)
             b[node.name] = node
-          elsif node.respond_to?(:nodelist)
+          end
+          if node.respond_to?(:nodelist)
             self.find_blocks(node.nodelist, b) # FIXME: find nested blocks too
           end
           b
@@ -47,6 +43,15 @@ module Liquid
       end
       blocks
     end
+
+    private
+
+    def parse_parent_template(context)
+      source = Template.file_system.read_template_file(@template_name)
+      Template.parse(source, context)
+    end
+
+
 
     def assert_missing_delimitation!
     end
