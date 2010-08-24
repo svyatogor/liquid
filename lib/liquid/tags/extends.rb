@@ -51,8 +51,6 @@ module Liquid
       Template.parse(source, context)
     end
 
-
-
     def assert_missing_delimitation!
     end
   end

@@ -19,6 +19,8 @@ module Liquid
         raise SyntaxError.new("Error in tag 'block' - Valid syntax: block [name]")
       end
 
+      context[:current_block] = self
+
       super if tokens
     end
 
