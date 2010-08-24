@@ -17,6 +17,10 @@ module Liquid
 
       super
 
+      end_tag
+    end
+
+    def end_tag
       @context.merge!(:blocks => find_blocks(@nodelist))
 
       # puts "[EXTENDS #{@template_name}] blocks = #{@context[:blocks].inspect}"
