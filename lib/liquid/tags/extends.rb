@@ -17,11 +17,11 @@ module Liquid
 
       super
 
-      context.merge!(:blocks => find_blocks(@nodelist))
+      @context.merge!(:blocks => find_blocks(@nodelist))
 
-      # puts "[EXTENDS #{@template_name}] blocks = #{context[:blocks].inspect}"
+      # puts "[EXTENDS #{@template_name}] blocks = #{@context[:blocks].inspect}"
 
-      parent_template = parse_parent_template(context)
+      parent_template = parse_parent_template
 
       # replace the nodelist by the new one
       @nodelist = parent_template.root.nodelist
@@ -46,9 +46,9 @@ module Liquid
 
     private
 
-    def parse_parent_template(context)
+    def parse_parent_template
       source = Template.file_system.read_template_file(@template_name)
-      Template.parse(source, context)
+      Template.parse(source, @context)
     end
 
     def assert_missing_delimitation!
