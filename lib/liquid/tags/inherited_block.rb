@@ -81,6 +81,10 @@ module Liquid
       @block = block
     end
 
+    def name
+      @block.name
+    end
+
     def super
       # puts "[InheritedBlockDrop] called"
       @block.call_super(@context)
