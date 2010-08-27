@@ -33,23 +33,23 @@ module Liquid
     end
 
     def end_tag
-      context[:blocks] ||= {}
+      self.register_current_block
+    end
 
-      block = context[:blocks][@name]
+    def register_current_block
+      @context[:blocks] ||= {}
+
+      block = @context[:blocks][@name]
 
       if block
         # needed for the block.super statement
-        # puts "[BLOCK #{@name}|end_tag] nodelist #{@nodelist.inspect}"
         block.add_parent(@nodelist)
 
         @parent = block.parent
         @nodelist = block.nodelist
-
-        # puts "[BLOCK #{@name}|end_tag] direct parent #{block.parent.inspect}"
       else
         # register it
-        # puts "[BLOCK #{@name}|end_tag] register it"
-        context[:blocks][@name] = self
+        @context[:blocks][@name] = self
       end
     end
 
