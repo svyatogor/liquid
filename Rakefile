@@ -17,6 +17,7 @@ Rake::TestTask.new(:ti) do |t|
   t.libs << "lib"
   t.libs << "test"
   t.test_files = ['test/test_helper.rb', 'test/extends_test.rb', 'test/inherited_block_test.rb']
+  # t.test_files = ['test/test_helper.rb', 'test/inherited_block_test.rb', 'test/inherited_block_test.rb']
   t.verbose = false
 end
 

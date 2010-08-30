@@ -25,7 +25,6 @@ module Liquid
     end
 
     def render(context)
-      # puts "[BLOCK #{@name}|render] parent = #{@parent.inspect}"
       context.stack do
         context['block'] = InheritedBlockDrop.new(self)
         render_all(@nodelist, context)
@@ -36,40 +35,35 @@ module Liquid
       self.register_current_block
     end
 
+    def call_super(context)
+      if parent
+        parent.render(context)
+      else
+        ''
+      end
+    end
+
+    def self.clone_block(block)
+      new_block = self.new(block.send(:instance_variable_get, :"@tag_name"), block.name, nil, {})
+      new_block.parent = block.parent
+      new_block.nodelist = block.nodelist
+      new_block
+    end
+
+    protected
+
     def register_current_block
       @context[:blocks] ||= {}
 
       block = @context[:blocks][@name]
 
       if block
-        # needed for the block.super statement
-        block.add_parent(@nodelist)
+        # copy the existing block in order to make it a parent of the parsed block
+        new_block = self.class.clone_block(block)
 
-        @parent = block.parent
-        @nodelist = block.nodelist
-      else
-        # register it
-        @context[:blocks][@name] = self
-      end
-    end
-
-    def add_parent(nodelist)
-      if @parent
-        # puts "[BLOCK #{@name}|add_parent] go upper"
-        @parent.add_parent(nodelist)
-      else
-        # puts "[BLOCK #{@name}|add_parent] create parent #{@tag_name}, #{@name}"
-        @parent = self.class.new(@tag_name, @name, nil, {})
-        @parent.nodelist = nodelist
-      end
-    end
-
-    def call_super(context)
-      # puts "[BLOCK #{@name}|call_super] #{parent.inspect}"
-      if parent
-        parent.render(context)
-      else
-        ''
+        # replace the up-to-date version of the block in the parent template
+        block.parent = new_block
+        block.nodelist = @nodelist
       end
     end
 
@@ -86,7 +80,6 @@ module Liquid
     end
 
     def super
-      # puts "[InheritedBlockDrop] called"
       @block.call_super(@context)
     end
 
