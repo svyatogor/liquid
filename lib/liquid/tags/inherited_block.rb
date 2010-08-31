@@ -19,6 +19,7 @@ module Liquid
         raise SyntaxError.new("Error in tag 'block' - Valid syntax: block [name]")
       end
 
+      (context[:block_stack] ||= []).push(self)
       context[:current_block] = self
 
       super if tokens
@@ -33,6 +34,9 @@ module Liquid
 
     def end_tag
       self.register_current_block
+
+      @context[:block_stack].pop
+      @context[:current_block] = @context[:block_stack].last
     end
 
     def call_super(context)
