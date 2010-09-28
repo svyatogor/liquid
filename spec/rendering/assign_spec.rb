@@ -4,7 +4,7 @@ module Liquid
   describe "Liquid Rendering" do
     describe "Assignment" do
       let(:template) do
-        Template.parse(eval(subject))
+        Liquid::Template.parse(eval(subject))
       end
 
       context %|with 'values' => ["foo", "bar", "baz"]| do

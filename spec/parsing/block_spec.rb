@@ -5,12 +5,12 @@ module Liquid
     describe "Block" do
 
       it "should render whitespace properly" do
-        template = Template.parse("  ")
+        template = Liquid::Template.parse("  ")
         template.root.nodelist.should == ["  "]
       end
 
       let(:template) do
-        Template.parse(eval(subject))
+        Liquid::Template.parse(eval(subject))
       end
 
       describe %|"{{funk}}  "| do

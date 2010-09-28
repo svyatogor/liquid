@@ -7,7 +7,7 @@ module Liquid
       # capturing blocks content in a variable
       describe "assigning a capture block" do
         let(:template) do
-          Template.parse multiline_string(<<-END_LIQUID)
+          Liquid::Template.parse multiline_string(<<-END_LIQUID)
           |  {% capture 'var' %}test string{% endcapture %}
           |  {{var}}
           END_LIQUID
@@ -20,7 +20,7 @@ module Liquid
 
       describe "capturing to a variable from outer scope (if existing)" do
         let(:template) do
-          Template.parse multiline_string(<<-END_LIQUID)
+          Liquid::Template.parse multiline_string(<<-END_LIQUID)
           |  {% assign var = '' %}
           |  {% if true %}
           |    {% capture var %}first-block-string{% endcapture %}
@@ -39,7 +39,7 @@ module Liquid
 
       describe "assigning from a capture block" do
         let(:template) do
-          Template.parse multiline_string(<<-END_LIQUID)
+          Liquid::Template.parse multiline_string(<<-END_LIQUID)
           |  {% assign first = '' %}
           |  {% assign second = '' %}
           |  {% for number in (1..3) %}

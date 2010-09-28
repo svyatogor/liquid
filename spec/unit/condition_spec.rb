@@ -8,7 +8,7 @@ module Liquid
 
     # simple wrapper around CheckCondition evaluate
     def check_condition(*args)
-      Condition.new(*args).evaluate(@context)
+      Liquid::Condition.new(*args).evaluate(@context)
     end
 
 
@@ -93,30 +93,30 @@ module Liquid
 
     describe %{Chaining with "or"} do
       before(:each) do
-        @condition = Condition.new("1", "==", "2")
+        @condition = Liquid::Condition.new("1", "==", "2")
         @condition.evaluate.should be_false
       end
 
       it "should return true when it you add a single condition that evaluates to true" do
-        @condition.or Condition.new("2", "==", "1")
+        @condition.or Liquid::Condition.new("2", "==", "1")
         @condition.evaluate.should be_false
 
-        @condition.or Condition.new("1", "==", "1")
+        @condition.or Liquid::Condition.new("1", "==", "1")
         @condition.evaluate.should be_true
       end
     end
 
     describe %{Chaining with "and"} do
       before(:each) do
-        @condition = Condition.new("1", "==", "1")
+        @condition = Liquid::Condition.new("1", "==", "1")
         @condition.evaluate.should be_true
       end
 
       it "should return false when it you add a single condition that evaluates to false" do
-        @condition.and Condition.new("2", "==", "2")
+        @condition.and Liquid::Condition.new("2", "==", "2")
         @condition.evaluate.should be_true
 
-        @condition.and Condition.new("2", "==", "1")
+        @condition.and Liquid::Condition.new("2", "==", "1")
         @condition.evaluate.should be_false
       end
     end
