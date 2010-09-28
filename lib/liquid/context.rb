@@ -97,7 +97,7 @@ module Liquid
       end
       result
     end
-    
+
     def clear_instance_assigns
       @scopes[0] = {}
     end
@@ -172,7 +172,7 @@ module Liquid
       end
       scope     ||= @environments.last || @scopes.last
       variable  ||= lookup_and_evaluate(scope, key)
-      
+
       variable = variable.to_liquid
       variable.context = self if variable.respond_to?(:context=)
       return variable
@@ -230,7 +230,7 @@ module Liquid
 
       object
     end
-    
+
     def lookup_and_evaluate(obj, key)
       if (value = obj[key]).is_a?(Proc) && obj.respond_to?(:[]=)
         obj[key] = value.call(self)
@@ -238,7 +238,7 @@ module Liquid
         value
       end
     end
-    
+
     def squash_instance_assigns_with_environments
       @scopes.last.each_key do |k|
         @environments.each do |env|
@@ -249,6 +249,6 @@ module Liquid
         end
       end
     end
-    
+
   end
 end
