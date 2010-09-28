@@ -1,4 +1,3 @@
-puts "WTF"
 module RSpec
   module MultilineStringHelper
     #
