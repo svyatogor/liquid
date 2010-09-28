@@ -1,3 +1,4 @@
 *.gem
 pkg
 .rvmrc
+.bundle/config
