@@ -20,8 +20,12 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 module Liquid
   module RenderSpecHelper
-    def render(body, data = {})
-      Liquid::Template.parse(body).render(data)
+    def render(body, *args)
+      Liquid::Template.parse(body).render(*args)
+    end
+
+    def render!(body, *args)
+      Liquid::Template.parse(body).render!(*args)
     end
   end
 end
