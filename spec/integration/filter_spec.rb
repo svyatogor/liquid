@@ -2,47 +2,12 @@ require 'spec_helper'
 
 describe "Liquid Rendering" do
   describe "Filters" do
-
-    module MoneyFilter
-      def money(input)
-        sprintf('$%d', input)
-      end
-
-      def money_with_underscores(input)
-        sprintf('_$%d_', input)
-      end
-    end
-
-    module CanadianMoneyFilter
-      def money(input)
-        sprintf('$%d CAD', input)
-      end
-    end
-
     before(:each) do
       @context = Liquid::Context.new
     end
 
     def render_variable(body)
       Liquid::Variable.new(body).render(@context)
-    end
-
-    context "with custom filters added to context" do
-      before(:each) do
-        @context['val'] = 1000
-      end
-
-      it "should use the local filters" do
-        @context.add_filters(MoneyFilter)
-        render_variable('val | money').should == "$1000"
-        render_variable('val | money_with_underscores').should == "_$1000_"
-      end
-
-      it "should allow filters to overwrite previous ones" do
-        @context.add_filters(MoneyFilter)
-        @context.add_filters(CanadianMoneyFilter)
-        render_variable('val | money').should == "$1000 CAD"
-      end
     end
 
     context "standard filters" do
@@ -217,7 +182,40 @@ describe "Liquid Rendering" do
           render_variable('val | prepend: prev').should == "<< prev :: bc"
         end
       end
+    end
 
+    module MoneyFilter
+      def money(input)
+        sprintf('$%d', input)
+      end
+
+      def money_with_underscores(input)
+        sprintf('_$%d_', input)
+      end
+    end
+
+    module CanadianMoneyFilter
+      def money(input)
+        sprintf('$%d CAD', input)
+      end
+    end
+
+    context "with custom filters added to context" do
+      before(:each) do
+        @context['val'] = 1000
+      end
+
+      it "should use the local filters" do
+        @context.add_filters(MoneyFilter)
+        render_variable('val | money').should == "$1000"
+        render_variable('val | money_with_underscores').should == "_$1000_"
+      end
+
+      it "should allow filters to overwrite previous ones" do
+        @context.add_filters(MoneyFilter)
+        @context.add_filters(CanadianMoneyFilter)
+        render_variable('val | money').should == "$1000 CAD"
+      end
     end
 
     context "filters in template" do
