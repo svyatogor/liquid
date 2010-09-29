@@ -18,6 +18,21 @@ describe "Liquid Rendering" do
       super(text, data, filters)
     end
 
+    it "should not transform plaintext" do
+      render('this text should come out of the template without change...').should ==
+             'this text should come out of the template without change...'
+
+      render('blah').should == 'blah'
+      render('<blah>').should == '<blah>'
+      render('|,.:').should == '|,.:'
+      render('').should == ''
+
+      text = %|this shouldnt see any transformation either but has multiple lines
+                as you can clearly see here ...|
+      render(text).should == text
+    end
+
+
     it "should render a variable's value" do
       render(' {{best_cars}} ').should == " bmw "
     end

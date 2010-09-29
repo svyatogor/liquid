@@ -4,31 +4,6 @@ require File.dirname(__FILE__) + '/helper'
 class StandardTagTest < Test::Unit::TestCase
   include Liquid
 
-
-  def test_tag
-    tag = Tag.new('tag', [], [], {})
-    assert_equal 'liquid::tag', tag.name
-    assert_equal '', tag.render(Context.new)
-  end
-
-  def test_store_context_at_parsing_time
-    tag = Tag.new('tag', [], [], { :foo => 'bar' })
-    assert_equal 'bar', tag.context[:foo]
-  end
-
-  def test_no_transform
-    assert_template_result('this text should come out of the template without change...',
-                           'this text should come out of the template without change...')
-    assert_template_result('blah','blah')
-    assert_template_result('<blah>','<blah>')
-    assert_template_result('|,.:','|,.:')
-    assert_template_result('','')
-
-    text = %|this shouldnt see any transformation either but has multiple lines
-              as you can clearly see here ...|
-    assert_template_result(text,text)
-  end
-
   def test_has_a_block_which_does_nothing
     assert_template_result(%|the comment block should be removed  .. right?|,
                            %|the comment block should be removed {%comment%} be gone.. {%endcomment%} .. right?|)
@@ -202,6 +177,24 @@ HERE
       assert_template_result(expected,markup,assigns)
   end
 
+  def test_for_reversed
+    assigns = {'array' => [ 1, 2, 3] }
+    assert_template_result('321','{%for item in array reversed %}{{item}}{%endfor%}',assigns)
+  end
+
+
+  def test_ifchanged
+    assigns = {'array' => [ 1, 1, 2, 2, 3, 3] }
+    assert_template_result('123','{%for item in array%}{%ifchanged%}{{item}}{% endifchanged %}{%endfor%}',assigns)
+
+    assigns = {'array' => [ 1, 1, 1, 1] }
+    assert_template_result('1','{%for item in array%}{%ifchanged%}{{item}}{% endifchanged %}{%endfor%}',assigns)
+  end
+
+
+
+  # ASSIGNMENT
+
   def test_assign
     assigns = {'var' => 'content' }
     assert_template_result('var2:  var2:content','var2:{{var2}} {%assign var2 = var%} var2:{{var2}}',assigns)
@@ -219,6 +212,22 @@ HERE
     assert_template_result('var2: 1','{%assign var2 = var["a:b c"].paged %}var2: {{var2}}',assigns)
   end
 
+  def test_assign2
+    assert_equal 'variable', Liquid::Template.parse( '{% assign a = "variable"%}{{a}}'  ).render
+  end
+
+  def test_assign_an_empty_string
+    assert_equal '', Liquid::Template.parse( '{% assign a = ""%}{{a}}'  ).render
+  end
+
+  def test_assign_is_global
+    assert_equal 'variable', Liquid::Template.parse( '{%for i in (1..2) %}{% assign a = "variable"%}{% endfor %}{{a}}'  ).render
+  end
+
+
+
+
+  # CAPTURE
   def test_capture
     assigns = {'var' => 'content' }
     assert_template_result('content foo content foo ','{{ var2 }}{% capture var2 %}{{ var }} foo {% endcapture %}{{ var2 }}{{ var2 }}', assigns)
@@ -229,6 +238,8 @@ HERE
       assert_template_result('content foo content foo ','{{ var2 }}{% capture %}{{ var }} foo {% endcapture %}{{ var2 }}{{ var2 }}', {'var' => 'content' })
     end
   end
+
+  # CASE
 
   def test_case
     assigns = {'condition' => 2 }
@@ -327,18 +338,6 @@ HERE
     assert_template_result('', code, {'condition' => 'something else' })
   end
 
-  def test_assign
-    assert_equal 'variable', Liquid::Template.parse( '{% assign a = "variable"%}{{a}}'  ).render
-  end
-
-  def test_assign_an_empty_string
-    assert_equal '', Liquid::Template.parse( '{% assign a = ""%}{{a}}'  ).render
-  end
-
-  def test_assign_is_global
-    assert_equal 'variable', Liquid::Template.parse( '{%for i in (1..2) %}{% assign a = "variable"%}{% endfor %}{{a}}'  ).render
-  end
-
   def test_case_detects_bad_syntax
     assert_raise(SyntaxError) do
       assert_template_result('',  '{% case false %}{% when %}true{% endcase %}', {})
@@ -351,6 +350,7 @@ HERE
   end
 
 
+  # CYCLE
 
   def test_cycle
 
@@ -377,6 +377,8 @@ HERE
     assert_template_result('one one two two one one','{%cycle var1: "one", "two" %} {%cycle var2: "one", "two" %} {%cycle var1: "one", "two" %} {%cycle var2: "one", "two" %} {%cycle var1: "one", "two" %} {%cycle var2: "one", "two" %}', assigns)
   end
 
+  # SIZE
+
   def test_size_of_array
     assigns = {"array" => [1,2,3,4]}
     assert_template_result('array has 4 elements', "array has {{ array.size }} elements", assigns)
@@ -387,6 +389,8 @@ HERE
     assert_template_result('hash has 4 elements', "hash has {{ hash.size }} elements", assigns)
   end
 
+  # MISC
+
   def test_illegal_symbols
     assert_template_result('',     '{% if true == empty %}?{% endif %}', {})
     assert_template_result('',     '{% if true == null %}?{% endif %}', {})
@@ -394,17 +398,4 @@ HERE
     assert_template_result('',     '{% if null == true %}?{% endif %}', {})
   end
 
-  def test_for_reversed
-    assigns = {'array' => [ 1, 2, 3] }
-    assert_template_result('321','{%for item in array reversed %}{{item}}{%endfor%}',assigns)
-  end
-
-
-  def test_ifchanged
-    assigns = {'array' => [ 1, 1, 2, 2, 3, 3] }
-    assert_template_result('123','{%for item in array%}{%ifchanged%}{{item}}{% endifchanged %}{%endfor%}',assigns)
-
-    assigns = {'array' => [ 1, 1, 1, 1] }
-    assert_template_result('1','{%for item in array%}{%ifchanged%}{{item}}{% endifchanged %}{%endfor%}',assigns)
-  end
 end
