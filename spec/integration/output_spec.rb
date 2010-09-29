@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-
-
 describe "Liquid Rendering" do
   describe "Basic Output" do
 

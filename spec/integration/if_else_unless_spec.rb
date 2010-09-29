@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe "Liquid Rendering" do
-  describe "If/Else" do
+  describe "If/Else/Unless" do
 
-    describe "If" do
+    describe "if" do
       it "should show/hide content correctly when passed a boolean constant" do
         render(' {% if false %} this text should not go into the output {% endif %} ').should == "  "
         render(' {% if true %} this text should not go into the output {% endif %} ').should == "  this text should not go into the output  "
@@ -142,7 +142,7 @@ describe "Liquid Rendering" do
       end
     end
 
-    describe "Else" do
+    describe "if/else" do
       it "should render the right block based on the input" do
         render('{% if false %} NO {% else %} YES {% endif %}').should == " YES "
         render('{% if true %} YES {% else %} NO {% endif %}').should == " YES "
@@ -154,6 +154,40 @@ describe "Liquid Rendering" do
         render('{% if 0 != 0 %}0{% elsif 1 == 1%}1{% else %}2{% endif %}').should == '1'
         render('{% if 0 != 0 %}0{% elsif 1 != 1%}1{% else %}2{% endif %}').should == '2'
         render('{% if false %}if{% elsif true %}elsif{% endif %}').should == 'elsif'
+      end
+    end
+
+    describe "unless" do
+      it "should show/hide content correctly when passed a boolean constant" do
+        render(' {% unless true %} this text should not go into the output {% endunless %} ').should ==
+               '  '
+
+        render(' {% unless false %} this text should go into the output {% endunless %} ').should ==
+               '  this text should go into the output  '
+
+        render('{% unless true %} you suck {% endunless %} {% unless false %} you rock {% endunless %}?').should ==
+               '  you rock ?'
+
+      end
+
+      it "should work within a loop" do
+        data = {'choices' => [1, nil, false]}
+        render('{% for i in choices %}{% unless i %}{{ forloop.index }}{% endunless %}{% endfor %}', data).should == '23'
+      end
+
+    end
+
+    describe "unless/else" do
+      it "should show/hide the section based on the passed in data" do
+        render('{% unless true %} NO {% else %} YES {% endunless %}').should == ' YES '
+        render('{% unless false %} YES {% else %} NO {% endunless %}').should == ' YES '
+        render('{% unless "foo" %} NO {% else %} YES {% endunless %}').should == ' YES '
+      end
+
+      it "should work within a loop" do
+        data = {'choices' => [1, nil, false]}
+        render('{% for i in choices %}{% unless i %} {{ forloop.index }} {% else %} TRUE {% endunless %}{% endfor %}', data).should ==
+               ' TRUE  2  3 '
       end
     end
 

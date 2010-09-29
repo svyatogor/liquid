@@ -1,19 +1,18 @@
 require 'spec_helper'
 
-describe "Liquid File System" do
-
-  describe Liquid::BlankFileSystem do
+module Liquid
+  describe BlankFileSystem do
     it "should error out when trying to ready any file" do
       expect {
-        Liquid::BlankFileSystem.new.read_template_file("dummy")
+        BlankFileSystem.new.read_template_file("dummy")
       }.to raise_error(Liquid::FileSystemError)
     end
   end
 
-  describe Liquid::LocalFileSystem do
+  describe LocalFileSystem do
     describe "#full_path" do
       before(:each) do
-        @file_system = Liquid::LocalFileSystem.new("/some/path")
+        @file_system = LocalFileSystem.new("/some/path")
       end
 
       it "should translate partial paths to the full filesystem path" do
