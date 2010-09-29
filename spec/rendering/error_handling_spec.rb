@@ -54,6 +54,5 @@ describe "Liquid Rendering" do
       end
     end
 
-
   end
 end

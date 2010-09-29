@@ -1,25 +1,9 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'rake'
-require 'rake/testtask'
 require 'rake/gempackagetask'
 
-task :default => 'test'
-
-Rake::TestTask.new(:test) do |t|
-  t.libs << "lib"
-  t.libs << "test"
-  t.pattern = 'test/*_test.rb'
-  t.verbose = false
-end
-
-Rake::TestTask.new(:ti) do |t|
-  t.libs << "lib"
-  t.libs << "test"
-  t.test_files = ['test/test_helper.rb', 'test/extends_test.rb', 'test/inherited_block_test.rb']
-  # t.test_files = ['test/test_helper.rb', 'test/inherited_block_test.rb', 'test/inherited_block_test.rb']
-  t.verbose = false
-end
+task :default => 'spec'
 
 gemspec = eval(File.read('locomotive_liquid.gemspec'))
 Rake::GemPackageTask.new(gemspec) do |pkg|

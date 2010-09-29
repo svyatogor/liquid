@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Liquid Parsing" do
-  describe "Block" do
+  describe "Blocks" do
 
     it "should render whitespace properly" do
       template = Liquid::Template.parse("  ")
