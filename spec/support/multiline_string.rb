@@ -1,5 +1,5 @@
 module RSpec
-  module MultilineStringHelper
+  module MultilineString
     #
     # used to format multiline strings (prefix lines with |)
     #
@@ -16,7 +16,7 @@ module RSpec
     #
     def multiline_string(string, pipechar = '|')
       arr = string.split("\n")             # Split into lines
-      arr.map! {|x| x.sub(/^\s*\|/, "")}  # Remove leading characters
+      arr.map! {|x| x.sub(/^\s*\| /, "")}  # Remove leading characters
       arr.map! {|x| x.sub(/\|$/,"")}      # Remove ending characters
       arr.join("\n")                       # Rejoin into a single line
     end
@@ -24,5 +24,5 @@ module RSpec
 end
 
 Rspec.configure do |c|
-  c.include Rspec::MultilineStringHelper
+  c.include Rspec::MultilineString
 end

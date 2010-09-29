@@ -17,3 +17,15 @@ require 'rspec'
 # load support helpers
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
+
+module Liquid
+  module RenderSpecHelper
+    def render(body, data = {})
+      Liquid::Template.parse(body).render(data)
+    end
+  end
+end
+
+Rspec.configure do |c|
+  c.include Liquid::RenderSpecHelper
+end
