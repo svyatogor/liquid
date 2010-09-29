@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-require 'filters/money_filters'
+require 'filters/money_filter'
 
 describe "Liquid Rendering" do
   describe "Filters" do
