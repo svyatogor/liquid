@@ -19,7 +19,7 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 
 module Liquid
-  module RenderSpecHelper
+  module SpecHelpers
     def render(body, *args)
       Liquid::Template.parse(body).render(*args)
     end
@@ -27,9 +27,17 @@ module Liquid
     def render!(body, *args)
       Liquid::Template.parse(body).render!(*args)
     end
+
+    def parse(body = nil)
+      body = eval(subject) if body == :subject
+
+      Liquid::Template.parse(body)
+    end
+
+
   end
 end
 
 Rspec.configure do |c|
-  c.include Liquid::RenderSpecHelper
+  c.include Liquid::SpecHelpers
 end
