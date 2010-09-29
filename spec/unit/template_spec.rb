@@ -56,5 +56,23 @@ module Liquid
       t.assigns['foo'] = 'from persistent assigns'
       t.parse("{{ foo }}").render.should == 'from persistent assigns'
     end
+
+    it "should call lambda only once from persistent assigns over multiple parses and renders" do
+      t = Template.new
+      t.assigns['number'] = lambda { @global ||= 0; @global += 1 }
+      t.parse("{{number}}").render.should == '1'
+      t.parse("{{number}}").render.should == '1'
+      t.render.should == '1'
+      @global = nil
+    end
+
+    it "should call lambda only once from custom assigns over multiple parses and renders" do
+      t = Template.new
+      assigns = {'number' => lambda { @global ||= 0; @global += 1 }}
+      t.parse("{{number}}").render(assigns).should == '1'
+      t.parse("{{number}}").render(assigns).should == '1'
+      t.render(assigns).should == '1'
+      @global = nil
+    end
   end
 end
