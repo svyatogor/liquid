@@ -19,7 +19,6 @@ describe "Liquid Rendering" do
       end
     end
 
-
     before(:each) do
       @context = Liquid::Context.new
     end
@@ -121,6 +120,104 @@ describe "Liquid Rendering" do
           render_variable('val | capitalize').should == 'Blub'
         end
       end
+
+      describe "strip_newlines" do
+        it "should remove newlines from a string" do
+          @context['source'] = "a\nb\nc"
+          render_variable('source | strip_newlines').should == 'abc'
+        end
+      end
+
+      describe "newline_to_br" do
+        it "should convert line breaks to html <br>'s" do
+          @context['source'] = "a\nb\nc"
+          render_variable('source | newline_to_br').should == "a<br />\nb<br />\nc"
+        end
+      end
+
+      describe "plus" do
+        it "should increment a number by the specified amount" do
+          @context['val'] = 1
+          render_variable('val | plus:1').should == 2
+
+          @context['val'] = "1"
+          render_variable('val | plus:1').should == 2
+
+          @context['val'] = "1"
+          render_variable('val | plus:"1"').should == 2
+        end
+      end
+
+      describe "minus" do
+        it "should decrement a number by the specified amount" do
+          @context['val'] = 2
+          render_variable('val | minus:1').should == 1
+
+          @context['val'] = "2"
+          render_variable('val | minus:1').should == 1
+
+          @context['val'] = "2"
+          render_variable('val | minus:"1"').should == 1
+        end
+      end
+
+      describe "times" do
+        it "should multiply a number by the specified amount" do
+          @context['val'] = 2
+          render_variable('val | times:2').should == 4
+
+          @context['val'] = "2"
+          render_variable('val | times:2').should == 4
+
+          @context['val'] = "2"
+          render_variable('val | times:"2"').should == 4
+        end
+      end
+
+      describe "divided_by" do
+        it "should divide a number the specified amount" do
+          @context['val'] = 12
+          render_variable('val | divided_by:3').should == 4
+        end
+
+        it "should chop off the remainder when dividing by an integer" do
+          @context['val'] = 14
+          render_variable('val | divided_by:3').should == 4
+        end
+
+        it "should return a float when dividing by another float" do
+          @context['val'] = 14
+          render_variable('val | divided_by:3.0').should be_close(4.666, 0.001)
+        end
+
+        it "should return an errorm essage if divided by 0" do
+          @context['val'] = 5
+          expect{
+            render_variable('val | divided_by:0')
+          }.to raise_error(ZeroDivisionError)
+        end
+      end
+
+      describe "append" do
+        it "should append a string to another string" do
+          @context['val'] = "bc"
+          render_variable('val | append: "d"').should == "bcd"
+
+          @context['next'] = " :: next >>"
+          render_variable('val | append: next').should == "bc :: next >>"
+        end
+      end
+
+      describe "prepend" do
+        it "should prepend a string onto another string" do
+          @context['val'] = "bc"
+          render_variable('val | prepend: "a"').should == "abc"
+
+          @context['prev'] = "<< prev :: "
+          render_variable('val | prepend: prev').should == "<< prev :: bc"
+        end
+      end
+
     end
 
     context "filters in template" do
@@ -136,6 +233,15 @@ describe "Liquid Rendering" do
         Liquid::Template.parse('{{1000 | money}}').render(nil, :filters => CanadianMoneyFilter).should == "$1000 CAD"
         Liquid::Template.parse('{{1000 | money}}').render(nil, :filters => [CanadianMoneyFilter]).should == "$1000 CAD"
       end
+
+      it "should allow pipes in string arguments" do
+        render("{{ 'foo|bar' | remove: '|' }}").should == "foobar"
+      end
+
+      it "cannot access private methods" do
+        render("{{ 'a' | to_number }}").should == "a"
+      end
     end
+
   end
 end
