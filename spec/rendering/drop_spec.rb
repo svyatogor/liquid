@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-require 'fixtures/product_drop'
-require 'fixtures/context_drop'
-require 'fixtures/enumerable_drop'
+require 'drops/product_drop'
+require 'drops/context_drop'
+require 'drops/enumerable_drop'
 
 describe "Liquid Rendering" do
   describe "Drops" do

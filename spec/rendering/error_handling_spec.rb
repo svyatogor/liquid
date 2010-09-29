@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-require 'fixtures/error_drop'
+require 'drops/error_drop'
 
 describe "Liquid Rendering" do
   describe "Error Handling" do
