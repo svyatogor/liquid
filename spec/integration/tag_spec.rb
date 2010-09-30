@@ -34,6 +34,15 @@ describe "Liquid Rendering" do
       end
     end
 
+    describe "{% if %}" do
+      it "should allow illegal symbols in the condition" do
+        render('{% if true == empty %}hello{% endif %}').should == ""
+        render('{% if true == null %}hello{% endif %}').should == ""
+        render('{% if empty == true %}hello{% endif %}').should == ""
+        render('{% if null == true %}hello{% endif %}').should == ""
+      end
+    end
+
     describe "for" do
       describe "{% for item in collection %}" do
         it "should repeat the block for each item in the collection" do
@@ -241,10 +250,204 @@ describe "Liquid Rendering" do
 
           data = {'array' => [ 1, 1, 1, 1] }
           render('{%for item in array%}{%ifchanged%}{{item}}{% endifchanged %}{%endfor%}',data).should == '1'
+        end
+      end
+    end
+
+    describe "{% assign %}" do
+
+      it "should assign a variable to a string" do
+        render('{%assign var = "yo" %} var:{{var}} ').should == " var:yo "
+        render("{%assign var = 'yo' %} var:{{var}} ").should == " var:yo "
+        render("{%assign var='yo' %} var:{{var}} ").should == " var:yo "
+        render("{%assign var='yo'%} var:{{var}} ").should == " var:yo "
+
+        render('{%assign var="" %} var:{{var}} ').should == " var: "
+        render("{%assign var='' %} var:{{var}} ").should == " var: "
+      end
+
+      it "should assign a variable to an integer" do
+        render('{%assign var = 1 %} var:{{var}} ').should == " var:1 "
+        render("{%assign var=1 %} var:{{var}} ").should == " var:1 "
+        render("{%assign var =1 %} var:{{var}} ").should == " var:1 "
+      end
+
+      it "should assign a variable to a float" do
+        render('{%assign var = 1.011 %} var:{{var}} ').should == " var:1.011 "
+        render("{%assign var=1.011 %} var:{{var}} ").should == " var:1.011 "
+        render("{%assign var =1.011 %} var:{{var}} ").should == " var:1.011 "
+      end
+
+      it "should assign a variable that includes a hyphen" do
+        render('{%assign a-b = "yo" %} {{a-b}} ').should == " yo "
+        render('{{a-b}}{%assign a-b = "yo" %} {{a-b}} ').should == " yo "
+        render('{%assign a-b = "yo" %} {{a-b}} {{a}} {{b}} ', 'a' => 1, 'b' => 2).should == " yo 1 2 "
+      end
+
+      it "should assign a variable to a complex accessor" do
+        data = {'var' => {'a:b c' => {'paged' => '1' }}}
+        render('{%assign var2 = var["a:b c"].paged %}var2: {{var2}}', data).should == 'var2: 1'
+      end
+
+      it "should assign var2 to 'hello' when var is 'hello'" do
+        data = {'var' => 'Hello' }
+        render('var2:{{var2}} {%assign var2 = var%} var2:{{var2}}',data).should == 'var2:  var2:Hello'
+      end
+
+      it "should assign the variable in a global context, even if it is in a block" do
+        render( '{%for i in (1..2) %}{% assign a = "variable"%}{% endfor %}{{a}}'  ).should == "variable"
+      end
+    end
+
+    context "{% capture %}" do
+      it "should capture the result of a block into a variable" do
+        data = {'var' => 'content' }
+        render('{{ var2 }}{% capture var2 %}{{ var }} foo {% endcapture %}{{ var2 }}{{ var2 }}', data).should == 'content foo content foo '
+      end
+
+      it "should throw an error when it detects bad syntax" do
+        data = {'var' => 'content'}
+        expect {
+          render('{{ var2 }}{% capture %}{{ var }} foo {% endcapture %}{{ var2 }}{{ var2 }}', data)
+        }.to raise_error(Liquid::SyntaxError)
+      end
+    end
+
+    context "{% case %}" do
+      it "should render the first block with a matching {% when %} argument" do
+        data = {'condition' => 1 }
+        render('{% case condition %}{% when 1 %} its 1 {% when 2 %} its 2 {% endcase %}', data).should == ' its 1 '
+
+        data = {'condition' => 2 }
+        render('{% case condition %}{% when 1 %} its 1 {% when 2 %} its 2 {% endcase %}', data).should == ' its 2 '
+
+        # dont render whitespace between case and first when
+        data = {'condition' => 2 }
+        render('{% case condition %} {% when 1 %} its 1 {% when 2 %} its 2 {% endcase %}', data).should == ' its 2 '
+      end
+
+      it "should match strings correctly" do
+        data = {'condition' => "string here" }
+        render('{% case condition %}{% when "string here" %} hit {% endcase %}', data).should == ' hit '
+
+        data = {'condition' => "bad string here" }
+        render('{% case condition %}{% when "string here" %} hit {% endcase %}', data).should == ''
+      end
+
+      it "should not render anything if no matches found" do
+        data = {'condition' => 3 }
+        render(' {% case condition %}{% when 1 %} its 1 {% when 2 %} its 2 {% endcase %} ', data).should == '  '
+      end
+
+      it "should evaluate variables and expressions" do
+        render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% endcase %}', 'a' => []).should == ''
+        render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% endcase %}', 'a' => [1]).should == '1'
+        render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% endcase %}', 'a' => [1, 1]).should == '2'
+        render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% endcase %}', 'a' => [1, 1, 1]).should == ''
+        render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% endcase %}', 'a' => [1, 1, 1, 1]).should == ''
+        render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% endcase %}', 'a' => [1, 1, 1, 1, 1]).should == ''
+      end
+
+      it "should allow assignment from within a {% when %} block" do
+        # Example from the shopify forums
+        template = %q({% case collection.handle %}{% when 'menswear-jackets' %}{% assign ptitle = 'menswear' %}{% when 'menswear-t-shirts' %}{% assign ptitle = 'menswear' %}{% else %}{% assign ptitle = 'womenswear' %}{% endcase %}{{ ptitle }})
+
+        render(template, "collection" => {'handle' => 'menswear-jackets'}).should == 'menswear'
+        render(template, "collection" => {'handle' => 'menswear-t-shirts'}) == 'menswear'
+        render(template, "collection" => {'handle' => 'x'}) == 'womenswear'
+        render(template, "collection" => {'handle' => 'y'}) == 'womenswear'
+        render(template, "collection" => {'handle' => 'z'}) == 'womenswear'
+      end
+
+      it "should allow the use of 'or' to chain parameters with {% when %}" do
+        template = '{% case condition %}{% when 1 or 2 or 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}'
+        render(template, {'condition' => 1 }).should == ' its 1 or 2 or 3 '
+        render(template, {'condition' => 2 }).should == ' its 1 or 2 or 3 '
+        render(template, {'condition' => 3 }).should == ' its 1 or 2 or 3 '
+        render(template, {'condition' => 4 }).should == ' its 4 '
+        render(template, {'condition' => 5 }).should == ''
+
+        template = '{% case condition %}{% when 1 or "string" or null %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}'
+        render(template, 'condition' => 1).should == ' its 1 or 2 or 3 '
+        render(template, 'condition' => 'string').should == ' its 1 or 2 or 3 '
+        render(template, 'condition' => nil).should == ' its 1 or 2 or 3 '
+        render(template, 'condition' => 'something else').should == ''
+      end
+
+      it "should allow the use of commas to chain parameters with {% when %} " do
+        template = '{% case condition %}{% when 1, 2, 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}'
+        render(template, {'condition' => 1 }).should == ' its 1 or 2 or 3 '
+        render(template, {'condition' => 2 }).should == ' its 1 or 2 or 3 '
+        render(template, {'condition' => 3 }).should == ' its 1 or 2 or 3 '
+        render(template, {'condition' => 4 }).should == ' its 4 '
+        render(template, {'condition' => 5 }).should == ''
+
+        template = '{% case condition %}{% when 1, "string", null %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}'
+        render(template, 'condition' => 1).should == ' its 1 or 2 or 3 '
+        render(template, 'condition' => 'string').should == ' its 1 or 2 or 3 '
+        render(template, 'condition' => nil).should == ' its 1 or 2 or 3 '
+        render(template, 'condition' => 'something else').should == ''
+      end
+
+      it "should raise an error when theres bad syntax" do
+        expect {
+          render!('{% case false %}{% when %}true{% endcase %}')
+        }.to raise_error(Liquid::SyntaxError)
+
+        expect {
+          render!('{% case false %}{% huh %}true{% endcase %}')
+        }.to raise_error(Liquid::SyntaxError)
+      end
+
+      context "with {% else %}" do
+        it "should render the {% else %} block when no matches found" do
+          data = {'condition' => 5 }
+          render('{% case condition %}{% when 5 %} hit {% else %} else {% endcase %}', data).should == ' hit '
+
+          data = {'condition' => 6 }
+          render('{% case condition %}{% when 5 %} hit {% else %} else {% endcase %}', data).should == ' else '
+        end
+
+        it "should evaluate variables and expressions" do
+          render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% else %}else{% endcase %}', 'a' => []).should == 'else'
+          render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% else %}else{% endcase %}', 'a' => [1]).should == '1'
+          render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% else %}else{% endcase %}', 'a' => [1, 1]).should == '2'
+          render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% else %}else{% endcase %}', 'a' => [1, 1, 1]).should == 'else'
+          render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% else %}else{% endcase %}', 'a' => [1, 1, 1, 1]).should == 'else'
+          render('{% case a.size %}{% when 1 %}1{% when 2 %}2{% else %}else{% endcase %}', 'a' => [1, 1, 1, 1, 1]).should == 'else'
+
+
+          render('{% case a.empty? %}{% when true %}true{% when false %}false{% else %}else{% endcase %}', {}).should == "else"
+          render('{% case false %}{% when true %}true{% when false %}false{% else %}else{% endcase %}', {}).should == "false"
+          render('{% case true %}{% when true %}true{% when false %}false{% else %}else{% endcase %}', {}).should == "true"
+          render('{% case NULL %}{% when true %}true{% when false %}false{% else %}else{% endcase %}', {}).should == "else"
 
         end
       end
+    end
 
+    context "{% cycle %}" do
+
+      it "should cycle through a list of strings" do
+        render('{%cycle "one", "two"%}').should == 'one'
+        render('{%cycle "one", "two"%} {%cycle "one", "two"%}').should == 'one two'
+        render('{%cycle "", "two"%} {%cycle "", "two"%}').should == ' two'
+        render('{%cycle "one", "two"%} {%cycle "one", "two"%} {%cycle "one", "two"%}').should == 'one two one'
+        render('{%cycle "text-align: left", "text-align: right" %} {%cycle "text-align: left", "text-align: right"%}').should == 'text-align: left text-align: right'
+      end
+
+      it "should keep track of multiple cycles" do
+        render('{%cycle 1,2%} {%cycle 1,2%} {%cycle 1,2%} {%cycle 1,2,3%} {%cycle 1,2,3%} {%cycle 1,2,3%} {%cycle 1,2,3%}').should == '1 2 1 1 2 3 1'
+      end
+
+      it "should keep track of multiple named cycles" do
+        render('{%cycle 1: "one", "two" %} {%cycle 2: "one", "two" %} {%cycle 1: "one", "two" %} {%cycle 2: "one", "two" %} {%cycle 1: "one", "two" %} {%cycle 2: "one", "two" %}').should == 'one one two two one one'
+      end
+
+      it "should allow multiple named cycles with names from context" do
+        data = {"var1" => 1, "var2" => 2 }
+        render('{%cycle var1: "one", "two" %} {%cycle var2: "one", "two" %} {%cycle var1: "one", "two" %} {%cycle var2: "one", "two" %} {%cycle var1: "one", "two" %} {%cycle var2: "one", "two" %}', data).should == 'one one two two one one'
+      end
     end
 
 

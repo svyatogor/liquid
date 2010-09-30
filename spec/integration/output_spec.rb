@@ -10,7 +10,8 @@ describe "Liquid Rendering" do
     let(:data) do
       {
         'best_cars' => 'bmw',
-        'car' => {'bmw' => 'good', 'gm' => 'bad'}
+        'car' => {'bmw' => 'good', 'gm' => 'bad'},
+        'brands' => ['bmw', 'gm', 'ford']
       }
     end
 
@@ -32,13 +33,20 @@ describe "Liquid Rendering" do
       render(text).should == text
     end
 
-
     it "should render a variable's value" do
       render(' {{best_cars}} ').should == " bmw "
     end
 
     it "should render a traversed variable's value" do
       render(' {{car.bmw}} {{car.gm}} {{car.bmw}} ').should == " good bad good "
+    end
+
+    it "should output an array's size" do
+      render('{{brands.size}}').should == "3"
+    end
+
+    it "should output a hash's size" do
+      render('{{car.size}}').should == "2"
     end
 
     module FunnyFilter
