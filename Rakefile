@@ -10,10 +10,21 @@ require 'rake/gempackagetask'
 require "rspec"
 require "rspec/core/rake_task"
 
-Rspec::Core::RakeTask.new(:spec) do |spec|
+Rspec::Core::RakeTask.new("spec") do |spec|
   spec.pattern = "spec/**/*_spec.rb"
 end
 
+desc "Run the Integration Specs (rendering)"
+Rspec::Core::RakeTask.new("spec:integration") do |spec|
+  spec.pattern = "spec/unit/*_spec.rb"
+end
+
+desc "Run the Unit Specs"
+Rspec::Core::RakeTask.new("spec:unit") do |spec|
+  spec.pattern = "spec/unit/*_spec.rb"
+end
+
+desc "Run all the specs without all the verbose spec output"
 Rspec::Core::RakeTask.new('spec:progress') do |spec|
   spec.rspec_opts = %w(--format progress)
   spec.pattern = "spec/**/*_spec.rb"
