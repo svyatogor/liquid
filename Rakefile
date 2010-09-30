@@ -1,9 +1,25 @@
 #!/usr/bin/env ruby
 require 'rubygems'
+
+require "bundler"
+Bundler.setup
+
 require 'rake'
 require 'rake/gempackagetask'
 
-task :default => 'spec'
+require "rspec"
+require "rspec/core/rake_task"
+
+Rspec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = "spec/**/*_spec.rb"
+end
+
+Rspec::Core::RakeTask.new('spec:progress') do |spec|
+  spec.rspec_opts = %w(--format progress)
+  spec.pattern = "spec/**/*_spec.rb"
+end
+
+task :default => :spec
 
 gemspec = eval(File.read('locomotive_liquid.gemspec'))
 Rake::GemPackageTask.new(gemspec) do |pkg|
