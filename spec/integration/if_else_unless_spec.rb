@@ -89,6 +89,13 @@ describe "Liquid Rendering" do
         render("{% if 'gnomeslab-and-or-liquid' containz 'gnomeslab-and-or-liquid' %}yes{% endif %}").should == "yes"
       end
 
+      it "should allow illegal symbols in the condition" do
+        render('{% if true == empty %}hello{% endif %}').should == ""
+        render('{% if true == null %}hello{% endif %}').should == ""
+        render('{% if empty == true %}hello{% endif %}').should == ""
+        render('{% if null == true %}hello{% endif %}').should == ""
+      end
+
       context "or conditionals" do
         it "should work correctly when passed 2 variables" do
           body = '{% if a or b %} YES {% endif %}'
