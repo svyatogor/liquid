@@ -39,7 +39,12 @@ end
 
 desc "build the gem and release it to rubygems.org"
 task :release => :gem do
-  sh "gem push pkg/locomotive_liquid-#{gemspec.version}.gem"
+  puts "Tagging #{gemspec.version}..."
+  system "git tag -a #{gemspec.version} -m 'Tagging #{gemspec.version}'"
+  puts "Pushing to Github..."
+  system "git push --tags"
+  puts "Pushing to rubygems.org..."
+  system "gem push pkg/#{gemspec.name}-#{gemspec.version}.gem"
 end
 
 namespace :profile do
