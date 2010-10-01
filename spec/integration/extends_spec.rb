@@ -18,8 +18,35 @@ describe "Liquid Rendering" do
     it "should allow extending a path" do
       @templates['parent-template'] = "Hurrah!"
 
-      template = Liquid::Template.parse "{% extends parent-template %}"
-      template.render.should == "Hurrah!"
+      output = render("{% extends parent-template %}")
+      output.should == "Hurrah!"
+    end
+
+    it "should allow include blocks within the parent template" do
+      @templates['partial1'] = "[Partial Content1]"
+      @templates['partial2'] = "[Partial Content2]"
+      @templates['parent-with-include'] = multiline_string(<<-END)
+      | {% include 'partial1' %}
+      | {% block thing %}{% include 'partial2' %}{% endblock %}
+      END
+
+      # check with overridden block
+      output = render multiline_string(<<-END)
+      | {% extends parent-with-include %}
+      | {% block thing %}[Overridden Block]{% endblock %}
+      END
+
+      output.should == multiline_string(<<-END)
+      | [Partial Content1]
+      | [Overridden Block]
+      END
+
+      # check includes within the parent's default block
+      output = render("{% extends parent-with-include %}")
+      output.should == multiline_string(<<-END)
+      | [Partial Content1]
+      | [Partial Content2]
+      END
     end
 
     # TODO
@@ -31,16 +58,16 @@ describe "Liquid Rendering" do
     it "should allow access to the context from the inherited template" do
       @templates['parent-with-variable'] = "Hello, {{ name }}!"
 
-      template = Liquid::Template.parse "{% extends parent-with-variable %}"
-      template.render('name' => 'Joe').should == "Hello, Joe!"
+      output = render("{% extends parent-with-variable %}", 'name' => 'Joe')
+      output.should == "Hello, Joe!"
     end
 
     it "should allow deep nesting of inherited templates" do
       @templates['parent-with-variable'] = "Hello, {{ name }}!!"
       @templates['parent-with-parent'] = "{% extends parent-with-variable %}"
 
-      template = Liquid::Template.parse "{% extends parent-with-parent %}"
-      template.render('name' => 'Joe').should == "Hello, Joe!!"
+      output = render("{% extends parent-with-parent %}", 'name' => 'Joe')
+      output.should == "Hello, Joe!!"
     end
 
     context "inherited blocks" do
@@ -68,5 +95,6 @@ describe "Liquid Rendering" do
         output.should == 'Output / Deep: Hello, World! -BAR-'
       end
     end
+
   end
 end

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Liquid Rendering" do
   describe "If/Else/Unless" do
 
-    describe "if" do
+    describe "{% if %}" do
       it "should show/hide content correctly when passed a boolean constant" do
         render(' {% if false %} this text should not go into the output {% endif %} ').should == "  "
         render(' {% if true %} this text should not go into the output {% endif %} ').should == "  this text should not go into the output  "
@@ -142,7 +142,7 @@ describe "Liquid Rendering" do
       end
     end
 
-    describe "if/else" do
+    describe "{% if %} {% else %}" do
       it "should render the right block based on the input" do
         render('{% if false %} NO {% else %} YES {% endif %}').should == " YES "
         render('{% if true %} YES {% else %} NO {% endif %}').should == " YES "
@@ -157,7 +157,7 @@ describe "Liquid Rendering" do
       end
     end
 
-    describe "unless" do
+    describe "{% unless %}" do
       it "should show/hide content correctly when passed a boolean constant" do
         render(' {% unless true %} this text should not go into the output {% endunless %} ').should ==
                '  '
@@ -177,7 +177,7 @@ describe "Liquid Rendering" do
 
     end
 
-    describe "unless/else" do
+    describe "{% unless %} {% else %}" do
       it "should show/hide the section based on the passed in data" do
         render('{% unless true %} NO {% else %} YES {% endunless %}').should == ' YES '
         render('{% unless false %} YES {% else %} NO {% endunless %}').should == ' YES '
