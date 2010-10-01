@@ -9,18 +9,18 @@ Gem::Specification.new do |s|
   s.description = "A secure, non-evaling end user template engine with aesthetic markup. Extended with liquid template inheritance for use in LocomotiveCMS"
 
 
-  s.extra_rdoc_files = ["History.txt", "README.txt"]
+  s.extra_rdoc_files = ["History.txt", "README.md"]
   s.files = Dir[ "CHANGELOG",
                  "History.txt",
                  "MIT-LICENSE",
-                 "README.txt",
+                 "README.md",
                  "Rakefile",
                  "init.rb",
                  "{lib}/**/*"]
 
   s.has_rdoc = true
   s.homepage = "http://www.locomotiveapp.org"
-  s.rdoc_options = ["--main", "README.txt"]
+  s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
   s.rubyforge_project = "locomotive_liquid"
 
