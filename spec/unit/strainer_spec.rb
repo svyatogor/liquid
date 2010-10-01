@@ -21,5 +21,9 @@ module Liquid
       strainer.respond_to?('size', false).should be_true
     end
 
+    it "should repond_to_missing properly" do
+      strainer.respond_to?(:respond_to_missing?).should == Object.respond_to?(:respond_to_missing?)
+    end
+
   end
 end
