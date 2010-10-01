@@ -1,36 +1,36 @@
 require 'cgi'
 
 module Liquid
-  
+
   module StandardFilters
-    
+
     # Return the size of an array or of an string
     def size(input)
-      
+
       input.respond_to?(:size) ? input.size : 0
-    end         
-    
+    end
+
     # convert a input string to DOWNCASE
     def downcase(input)
       input.to_s.downcase
-    end         
+    end
 
     # convert a input string to UPCASE
     def upcase(input)
       input.to_s.upcase
     end
-    
+
     # capitalize words in the input centence
     def capitalize(input)
       input.to_s.capitalize
     end
-        
+
     def escape(input)
       CGI.escapeHTML(input) rescue input
     end
-    
+
     alias_method :h, :escape
-    
+
     # Truncate a string down to x characters
     def truncate(input, length = 50, truncate_string = "...")
       if input.nil? then return end
@@ -44,19 +44,19 @@ module Liquid
       wordlist = input.to_s.split
       l = words.to_i - 1
       l = 0 if l < 0
-      wordlist.length > l ? wordlist[0..l].join(" ") + truncate_string : input 
+      wordlist.length > l ? wordlist[0..l].join(" ") + truncate_string : input
     end
-    
+
     def strip_html(input)
       input.to_s.gsub(/<script.*?<\/script>/, '').gsub(/<.*?>/, '')
-    end       
-    
-    # Remove all newlines from the string
-    def strip_newlines(input)        
-      input.to_s.gsub(/\n/, '')      
     end
-    
-    
+
+    # Remove all newlines from the string
+    def strip_newlines(input)
+      input.to_s.gsub(/\n/, '')
+    end
+
+
     # Join elements of the array with certain character between them
     def join(input, glue = ' ')
       [input].flatten.join(glue)
@@ -73,8 +73,8 @@ module Liquid
       elsif ary.first.respond_to?(property)
         ary.sort {|a,b| a.send(property) <=> b.send(property) }
       end
-    end               
-    
+    end
+
     # map/collect on a given property
     def map(input, property)
       ary = [input].flatten
@@ -84,42 +84,42 @@ module Liquid
         ary.map {|e| e.send(property) }
       end
     end
-            
+
     # Replace occurrences of a string with another
     def replace(input, string, replacement = '')
       input.to_s.gsub(string, replacement)
     end
-                                                 
+
     # Replace the first occurrences of a string with another
     def replace_first(input, string, replacement = '')
       input.to_s.sub(string, replacement)
-    end              
-                                                           
+    end
+
     # remove a substring
     def remove(input, string)
-      input.to_s.gsub(string, '')      
+      input.to_s.gsub(string, '')
     end
-                        
+
     # remove the first occurrences of a substring
     def remove_first(input, string)
-      input.to_s.sub(string, '')      
-    end             
-                              
+      input.to_s.sub(string, '')
+    end
+
     # add one string to another
     def append(input, string)
       input.to_s + string.to_s
     end
-                                
+
     # prepend a string to another
     def prepend(input, string)
       string.to_s + input.to_s
     end
-                                             
+
     # Add <br /> tags in front of all newlines in input string
-    def newline_to_br(input)        
-      input.to_s.gsub(/\n/, "<br />\n")      
+    def newline_to_br(input)
+      input.to_s.gsub(/\n/, "<br />\n")
     end
-    
+
     # Reformat a date
     #
     #   %a - The abbreviated weekday name (``Sun'')
@@ -149,62 +149,62 @@ module Liquid
     #   %Z - Time zone name
     #   %% - Literal ``%'' character
     def date(input, format)
-      
+
       if format.to_s.empty?
         return input.to_s
       end
-      
+
       date = input.is_a?(String) ? Time.parse(input) : input
-      
+
       if date.respond_to?(:strftime)
         date.strftime(format.to_s)
       else
         input
       end
-    rescue => e 
+    rescue => e
       input
     end
-    
-    # Get the first element of the passed in array 
-    # 
+
+    # Get the first element of the passed in array
+    #
     # Example:
     #    {{ product.images | first | to_img }}
-    #  
+    #
     def first(array)
       array.first if array.respond_to?(:first)
     end
 
-    # Get the last element of the passed in array 
-    # 
+    # Get the last element of the passed in array
+    #
     # Example:
     #    {{ product.images | last | to_img }}
-    #  
+    #
     def last(array)
       array.last if array.respond_to?(:last)
     end
-    
+
     # addition
     def plus(input, operand)
       to_number(input) + to_number(operand)
     end
-    
+
     # subtraction
     def minus(input, operand)
       to_number(input) - to_number(operand)
     end
-    
+
     # multiplication
     def times(input, operand)
       to_number(input) * to_number(operand)
     end
-    
+
     # division
     def divided_by(input, operand)
       to_number(input) / to_number(operand)
     end
-    
+
     private
-    
+
     def to_number(obj)
       case obj
       when Numeric
@@ -215,8 +215,8 @@ module Liquid
         0
       end
     end
-    
+
   end
-   
+
   Template.register_filter(StandardFilters)
 end
