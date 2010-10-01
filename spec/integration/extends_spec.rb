@@ -49,12 +49,6 @@ describe "Liquid Rendering" do
       END
     end
 
-    # TODO
-    # it "should allow extending, with additional content" do
-    #   template = Liquid::Template.parse "{% extends parent-template %} Huzzah!"
-    #   template.render.should == "Hurrah! Huzzah!"
-    # end
-
     it "should allow access to the context from the inherited template" do
       @templates['parent-with-variable'] = "Hello, {{ name }}!"
 
@@ -70,7 +64,25 @@ describe "Liquid Rendering" do
       output.should == "Hello, Joe!!"
     end
 
-    context "inherited blocks" do
+    describe "{% defaultcontent %}" do
+      it "should allow me to render in all the nonblock wrapped content from a parent layout" do
+        pending "how do i get the content?"
+
+        @templates['parent-template'] = multiline_string(<<-END)
+        | OUTSIDE {% defaultcontent %}
+        END
+
+        # with content
+        template = Liquid::Template.parse "{% extends parent-template %} [INSIDE]"
+        template.render.should == "OUTSIDE [INSIDE]"
+
+        # without content
+        template = Liquid::Template.parse "{% extends parent-template %}"
+        template.render.should == "OUTSIDE "
+      end
+    end
+
+    describe "inherited blocks" do
       before(:each) do
         @templates['base'] = "Output / {% block content %}Hello, World!{% endblock %}"
       end
