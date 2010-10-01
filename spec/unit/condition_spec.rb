@@ -11,10 +11,14 @@ module Liquid
       Condition.new(*args).evaluate(@context)
     end
 
-
     it "should check basic equality conditions" do
       check_condition("1", "==", "2").should be_false
       check_condition("1", "==", "1").should be_true
+    end
+
+    it "should check expressions" do
+      @context['one'] = @context['another'] = "gnomeslab-and-or-liquid"
+      check_condition('one', '==', 'another').should be_true
     end
 
     context "Default Operators (==, !=, <>, <, >, >=, <=)" do

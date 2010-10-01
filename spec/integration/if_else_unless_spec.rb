@@ -86,7 +86,7 @@ describe "Liquid Rendering" do
 
         render("{% if 'bob' containz 'o' %}yes{% endif %}").should == "yes"
         render("{% if 'bob' containz 'f' %}yes{% else %}no{% endif %}").should == "no"
-
+        render("{% if 'gnomeslab-and-or-liquid' containz 'gnomeslab-and-or-liquid' %}yes{% endif %}").should == "yes"
       end
 
       context "or conditionals" do
