@@ -111,6 +111,24 @@ module Liquid
       it "should allow you to specify the join character" do
         filters.join([1,2,3,4], ' - ').should == "1 - 2 - 3 - 4"
       end
+
+      it "should join a hash" do
+        output = filters.join({"one" => 1, "two" => 2})
+        output.should include("one 1")
+        output.should include("two 2")
+      end
+
+      it "should join a hash with a character" do
+        output = filters.join({"one" => 1, "two" => 2}, ' - ')
+        output.should include("one - 1")
+        output.should include("two - 2")
+      end
+
+      it "should join a hash with separate characters for fields, and keys" do
+        output = filters.join({"one" => 1, "two" => 2}, '|', '-')
+        output.should include("one-1")
+        output.should include("two-2")
+      end
     end
 
     context "#sort" do

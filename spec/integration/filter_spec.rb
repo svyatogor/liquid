@@ -36,8 +36,22 @@ describe "Liquid Rendering" do
 
         it "should join a hash" do
           @context['val'] = {"one" => 1}
-          render_variable('val | join').should == "one1"
+          render_variable('val | join').should == "one 1"
+
+          @context['val'] = {"two" => 2, "one" => 1}
+          output = render_variable('val | join: ":"')
+          output.should == "two:2:one:1"
         end
+
+        it "should join a hash with custom field and value separators" do
+          @context['val'] = {"one" => 1}
+          render_variable('val | join').should == "one 1"
+
+          @context['val'] = {"two" => 2, "one" => 1}
+          output = render_variable('val | join: "|", ":"')
+          output.should == "two:2|one:1"
+        end
+
 
         it "should join a string" do
           @context['val'] = "one"
@@ -238,6 +252,10 @@ describe "Liquid Rendering" do
 
       it "cannot access private methods" do
         render("{{ 'a' | to_number }}").should == "a"
+      end
+
+      it "should ignore nonexistant filters" do
+        render("{{ val | xyzzy }}", 'val' => 1000).should == "1000"
       end
     end
 

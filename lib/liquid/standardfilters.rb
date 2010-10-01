@@ -56,10 +56,14 @@ module Liquid
       input.to_s.gsub(/\n/, '')
     end
 
-
     # Join elements of the array with certain character between them
-    def join(input, glue = ' ')
-      [input].flatten.join(glue)
+    def join(input, array_glue = ' ', hash_glue = nil)
+      hash_glue ||= array_glue
+
+      # translate from hash to array if needed
+      input = input.map{|k,v| "#{k}#{hash_glue}#{v}" } if input.is_a?(Hash)
+
+      [input].flatten.join(array_glue)
     end
 
     # Sort elements of the array
