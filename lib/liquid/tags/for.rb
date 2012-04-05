@@ -82,6 +82,10 @@ module Liquid
       segment = slice_collection_using_each(collection, from, to)
 
       return '' if segment.empty?
+      
+      if @attributes['sample']
+        segment = segment.sample(@attributes['sample'].to_i)
+      end
 
       segment.reverse! if @reversed
 
